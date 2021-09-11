@@ -1,1 +1,31 @@
+Create install_cohesity_agent.yml
+---
+- name: Install Backup Client - Cohesity Agent
+  hosts: all
+  become: yes
+  gather_facts: no
+  tasks:
+    - name: Creating Directory "backup_client" for Agent Software under /opt Directory
+      file:
+        path: /opt/backup_client
+        state: directory
 
+    - name: Extracting the Agent Software
+      unarchive:
+        src: /opt/ansible/backup_client/files/cohesity_rhel5_linux_agent-6.3.1f_lean-20200706_cb8d0c45.tar
+        dest: /opt/backup_client/
+
+    - name: Setting the Permissions on Extracted Files
+      file:
+        path: /opt/backup_client/rhel_agent
+        owner: root
+        group: root
+        recurse: yes
+
+    - name: Installing the Agent
+      shell: ./install.sh
+      args:
+        chdir: /opt/backup_client/rhel_agent/
+
+    - name: Starting the Cohesity Agent
+      service: name=cohesity-agent state=restarted
