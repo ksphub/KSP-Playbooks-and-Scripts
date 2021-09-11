@@ -1,1 +1,19 @@
+---
+- name: PreCheck
+  hosts: all
+  become: yes
+  tasks:
+  - name: Execute the script
+    script: ./collect_info.sh
+    tags:
+    - precheck-script
 
+  - name: Fetch the file
+    fetch:
+      src: /tmp/{{ ansible_nodename }}
+      dest: /tmp/server_info/
+      flat: yes
+    tags:
+    - precheck-file
+  - name: send mail
+    shell: 'echo "PreCheck - {{ ansible_nodename }}" | mailx  -S smtp=<IP> -s "PreCheck - {{ ansible_nodename }}" -a /tmp/{{ ansible_nodename }} <EMAIL ID>
