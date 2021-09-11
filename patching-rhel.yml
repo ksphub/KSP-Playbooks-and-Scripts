@@ -1,1 +1,34 @@
 
+Create patching-rhel.yml
+---
+- name: Patching LAB Servers Quarterly
+  hosts: all
+  become: yes
+  strategy: free
+  tasks:
+    - name: RHEL 7 - upgrade all packages, excluding kernel & foo related packages
+      yum:
+        name: '*'
+        state: latest
+        disablerepo: "*"
+        enablerepo: "repo7"
+        exclude: "*openjdk*"
+        skip_broken: yes
+      when: ansible_distribution == 'RedHat' and ansible_distribution_major_version == '7'
+      register: yum_output
+    - debug: var=yum_output
+
+    - name: RHEL 6 - upgrade all packages, excluding kernel & foo related packages
+      yum:
+        name: '*'
+        state: latest
+        disablerepo: "*"
+        enablerepo: "repo6_LatestKernel,repo6,repoExtra"
+        exclude: "*openjdk*"
+        skip_broken: yes
+      when: ansible_distribution == 'RedHat' and ansible_distribution_major_version == '6'
+      register: yum_output
+    - debug: var=yum_output
+
+    - name: Execute the shutdown command in All Server's - Reboot required for updated kernel.
+      command: /sbin/shutdown -r now
