@@ -1,1 +1,27 @@
+Create setting_routes_cohesity_clients.yml
+---
+- name: Setting Routes for Cohesity Clients
+  hosts: all
+  become: yes
+  gather_facts: no
+  tasks:
+    - shell: |
+        ip route add <IP>/32 via <IP> dev bond3.8
+        ip route add <IP>/32 via <IP> dev bond3.8
+        ip route add <IP>/32 via <IP> dev bond3.8
+        ip route add <IP>/32 via <IP> dev bond3.8
+      register: cmdout
 
+    - debug:
+        var: cmdout.stdout_lines
+
+
+    - name: insert/update
+      blockinfile:
+        path: /etc/sysconfig/network-scripts/route-bond3.8
+        marker: "# {mark} <Comments/Description>"
+        content: |
+          <IP>/32 via <IP> dev bond3.8
+          <IP>/32 via <IP> dev bond3.8
+          <IP>/32 via <IP> dev bond3.8
+          <IP>/32 via <IP> dev bond3.8
