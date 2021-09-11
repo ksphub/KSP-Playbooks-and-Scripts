@@ -1,0 +1,22 @@
+---
+- name: Create LV and Mount It
+  hosts: all
+  become: yes
+  tasks:
+    - name: Create a logical volume of 30g.
+      lvol:
+        vg: vg_02
+        lv: lv_app
+        size: 100g
+
+    - name: Create a ext4 filesystem on /dev/mapper/vg_02-lv_app
+      filesystem:
+        fstype: ext4
+        dev: /dev/mapper/vg_02-lv_app
+
+    - name: Mount up device by src path
+      mount:
+        path: /app
+        src: /dev/mapper/vg_02-lv_app
+        fstype: ext4
+        state: mounted
