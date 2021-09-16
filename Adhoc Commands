@@ -1,1 +1,15 @@
-KSP 
+#!/bin/bash
+
+read -p 'FileName:' myfile
+read -p 'Subject:' mysub
+read -p 'USER:' myuser
+read -p 'Inventory:' myinv
+
+echo "Starting Ansible"
+ansible -i $myinv all -m shell -a "dmidecode -t system | grep  'Product Name' && echo ';' && dmidecode -t system | grep -A 2 -i product | grep Serial  && echo ';' && cat /etc/redhat-release && echo ';' && lscpu | grep 'CPU(s):' | grep -v 'NUMA' && echo ';' && free -h | grep Mem && uname -r"  -u $myuser --ask-pass --become --ask-sudo-pass > $myfile
+
+echo "Starting File Formating"
+cat $myfile | xargs |sed 's/ | SUCCESS | rc=0 >>/;/g' | sed 's/Red Hat Enterprise Linux Server release/RHEL/g' | sed 's/x86_64/&\n/g' | sed 's/Product Name: //g' | sed 's/Serial Number: //g'  > "$myfile".txt
+
+echo "Sending mail"
+echo "$mysub" | mailx  -S smtp=<SMTPIP> -s "$mysub" -a ./"$myfile".txt <emailID>
