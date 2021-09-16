@@ -1,0 +1,2 @@
+#!/bin/bash
+for i in `cat /etc/passwd | awk -F":" '{ print $1 }'` ; do passwd -S $i ; done
