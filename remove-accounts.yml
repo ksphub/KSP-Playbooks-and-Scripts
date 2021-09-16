@@ -1,0 +1,15 @@
+---
+- name: Remove Local Accounts
+  hosts: all
+  become: yes
+  tasks:
+   - name: Remove User
+     user:
+       name: "{{ item }}"
+       state: absent
+       remove: yes
+     with_items:
+       - '<username1>'
+       - '<username2>'
+       - '<username3>'
+       - '<username4>'
