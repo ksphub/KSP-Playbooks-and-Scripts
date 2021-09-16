@@ -13,3 +13,25 @@ cat $myfile | xargs |sed 's/ | SUCCESS | rc=0 >>/;/g' | sed 's/Red Hat Enterpris
 
 echo "Sending mail"
 echo "$mysub" | mailx  -S smtp=<SMTPIP> -s "$mysub" -a ./"$myfile".txt <emailID>
+
+
+
+
+
+
+---
+- name: PreCheck
+  hosts: all
+  become: yes
+  tasks:
+  - hpilo_facts:
+      host: 10.255.76.81
+      login: Administrator
+      password: Admin1234
+    delegate_to: localhost
+    register: results
+    
+    
+    
+    
+    
