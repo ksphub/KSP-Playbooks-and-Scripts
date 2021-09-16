@@ -167,6 +167,41 @@ ansible-playbook -i <inventory> portcheck.yml -u <userID> --ask-pass --ask-sudo-
 
 
 
+#> <inventory> ; > serverlist ; > pinglog
+
+#IP
+#for i in `cat <inventory>` ; do  host $i > /dev/null &&  serverfqdn=`host $i | awk -F" " '{ print $5 }'` && echo "$i,$serverfqdn" >> serverlist ; done
+#> serverlist ; for i in `cat <inventory>` ; do if  host $i > /dev/null ; then serverfqdn=`host $i | awk -F" " '{ print $5 }'` && echo "$i,$serverfqdn" >> serverlist ; else echo "$i,NoRecord" >> serverlist; fi ; done
+
+#hostname
+#> serverlist ;for i in `cat <inventory>` ; do  host $i > /dev/null && host $i | awk -F" " '{ print $1,$4}' >> serverlist ; done
+#> serverlist ;for i in `cat <inventory>` ; do  host $i > /dev/null && host $i-traf | awk -F" " '{ print $1,$4}' >> serverlist ; done
+# > serverlist ;for i in `cat <inventory>` ; do  host $i > /dev/null && host $i-ilo | awk -F" " '{ print $1,$4}' >> serverlist ; done
+
+#Ping Check
+#> pinglog ; for i in `cat <inventory>` ; do if ping -c 1 $i > /dev/null 2>&1 ; then echo "$i Pining" >> pinglog ; else echo "$i NotPining" >> pinglog ; fi ; done
+
+#CIQ Check
+#> pinglog ; for i in `cat <inventory>` ; do if grep -B 200 -w $i CIQ_All_Mar2020.html | grep -i uemm > /dev/null 2>&1 ; then echo "$i UEMM" >> pinglog ; else echo "$i NotUEMM" >> pinglog ; fi ; done
+#for i in `cat <inventory>`; do grep -rn -A 4 "CMD lscpu" /DO_NOT_DELETE_CIQ/decommissioned_servers/* | grep $i | tail -1 ; done
+#for i in `cat <inventory>`; do grep -rn -A 4 "CMD free" /DO_NOT_DELETE_CIQ/decommissioned_servers/* | grep $i | grep Mem ; done
+
+#BUILD
+#for i in `cat <inventory>`; do host $i; host $i-traf ; host $i-ems ; host $i-dg ; host $i-repl ; done
+
+#SSHCheck
+ssh -q -o StrictHostKeyChecking=no -o NumberOfPasswordPrompts=1 -l <userID> <IP> "uptime"
+
+#DecomPrecheck Status
+> prechecklog ; for i in `cat <inventory>` ; do if ls /DO_NOT_DELETE_CIQ/decommissioned_servers/* | grep -i $i > /dev/null 2>&1 ; then echo "$i Precheck_Available" >> prechecklog ; else echo "$i Precheck_NA" >> prechecklog  ; fi ; done
+
+#Product name and SerialNo
+for i in `cat <inventory>` ; do echo $i ; cat /DO_NOT_DELETE_CIQ/decommissioned_servers/*$i* | grep -A 2 "Product Name:" | grep -v "Not Specified" | grep -v "None" | grep -B 1 "Serial Number:" ; done
+
+#IP Ping
+for i in X.X.X.{1..254} ; do echo $i ; done
+> pinglog ; for i in X.X.X.{1..254} ; do if ping -c 1 $i > /dev/null 2>&1 ; then echo "$i Pining" >> pinglog ; else echo "$i NotPining" >> pinglog ; fi ; done
+
 
     
     
