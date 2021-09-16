@@ -1,0 +1,16 @@
+---
+- name: Install VMware Tools on RHEL6
+  hosts: all
+  become: yes
+  tasks:
+  - name: Extracting the VMwareTools Pacakage
+    unarchive:
+      src: http://<IP>/install/RHEL6_vm_tools/VMwareTools-10.3.5-10430147.tar.gz
+      dest: /var/tmp
+      remote_src: True
+    when: ansible_distribution == 'RedHat' and ansible_distribution_major_version == '6'
+
+  - name: Installing the VMwareTools
+    shell: ./vmware-install.pl -d
+    args:
+      chdir: /var/tmp/vmware-tools-distrib
