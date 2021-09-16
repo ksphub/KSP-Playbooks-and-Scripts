@@ -35,3 +35,138 @@ echo "$mysub" | mailx  -S smtp=<SMTPIP> -s "$mysub" -a ./"$myfile".txt <emailID>
     
     
     
+    
+ansible -i slist all -m shell -a "service multipathd status"  -u eskamm01@uprising --ask-pass --become --ask-sudo-pass
+ansible -i slist all -m shell -a "multipath -ll"  -u eskamm01@uprising --ask-pass --become --ask-sudo-pass > Jul082021-MultipathLL-3
+
+
+
+
+
+
+#!/bin/bash
+
+read -p 'FileName:' myfile
+read -p 'Subject:' mysub
+read -p 'USER:' myuser
+read -p 'Inventory:' myinv
+
+echo "Starting Ansible"
+ansible -i $myinv all -m shell -a "dmidecode -t system | grep  'Product Name' && echo ';' && dmidecode -t system | grep -A 2 -i product | grep Serial  && echo ';' && cat /etc/redhat-release && echo ';' && lscpu | grep 'CPU(s):' | grep -v 'NUMA' && echo ';' && free -h | grep Mem && uname -r"  -u $myuser --ask-pass --become --ask-sudo-pass > $myfile
+
+echo "Starting File Formating"
+cat $myfile | xargs |sed 's/ | SUCCESS | rc=0 >>/;/g' | sed 's/Red Hat Enterprise Linux Server release/RHEL/g' | sed 's/x86_64/&\n/g' | sed 's/Product Name: //g' | sed 's/Serial Number: //g'  > "$myfile".txt
+
+echo "Sending mail"
+echo "$mysub" | mailx  -S smtp=<SMTPIP> -s "$mysub" -a ./"$myfile".txt <emailID>
+
+
+
+
+
+
+---
+- name: PreCheck
+  hosts: all
+  become: yes
+  tasks:
+  - hpilo_facts:
+      host: 10.255.76.81
+      login: Administrator
+      password: Admin1234
+    delegate_to: localhost
+    register: results
+    
+    
+    
+    
+    
+    
+ansible -i <inventory> all -m shell -a "service multipathd status"  -u <userID> --ask-pass --become --ask-sudo-pass
+ansible -i <inventory> all -m shell -a "multipath -ll"  -u <userID> --ask-pass --become --ask-sudo-pass > Jul082021-MultipathLL-3
+
+
+
+dmidecode -t system | grep -i product
+
+for i in `cat <inventory>` ; do echo $i  ; done
+for i in `cat <inventory>` ; do host $i  ; done
+ansible -i <inventory> all -m shell -a "uname -r && uptime && cat /etc/redhat-release"  -u <userID> --ask-pass
+ansible -i <inventory> all -m shell -a "free -h"  -u <userID> --ask-pass --become --ask-sudo-pass
+ansible -i <inventory> all -m shell -a "dmidecode -t bios | grep 'Firmware Revision:'"  -u <userID> --ask-pass --become --ask-sudo-pass
+
+ansible -i <inventory> all -m shell -a "ping -w5 8.8.8.8"  -u <userID> --ask-pass --become --ask-sudo-pass 
+
+ansible -i <inventory> all -m shell -a "service multipathd status"  -u <userID> --ask-pass --become --ask-sudo-pass
+
+su - grid -c olsnodes
+
+
+ansible-playbook -i <inventory> precheck-mail.yml -u <userID> --ask-pass --ask-sudo-pass
+
+./quick-check.sh
+
+ansible -i <inventory> all -m shell -a "ls -l /usr/local/bin/StartStop/"  -u <userID> --ask-pass --become --ask-sudo-pass
+
+ansible -i <inventory> all -m shell -a "/usr/local/bin/StartStop/startstop.sh stop"  -u <userID> --ask-pass --become --ask-sudo-pass
+ansible -i <inventory> all -m shell -a "/usr/software/auto/scripts/svcSAPctrl start"  -u <userID> --ask-pass --become --ask-sudo-pass
+
+ansible -i <inventory> all -m shell -a "pgrep -fl vmtoolsd"  -u <userID> --ask-pass --become --ask-sudo-pass
+ansible -i <inventory> all -m shell -a "vmware-toolbox-cmd -v"  -u <userID> --ask-pass --become --ask-sudo-pass
+ansible -i <inventory> all -m shell -a "vmtoolsd --version"  -u <userID> --ask-pass --become --ask-sudo-pass
+
+
+ansible -i <inventory> all -m shell -a "ps -ef | grep -i pmon"  -u <userID> --ask-pass --become --ask-sudo-pass
+ansible -i <inventory> all -m shell -a "ps -ef | grep -v <userID>"  -u <userID> --ask-pass --become --ask-sudo-pass
+
+ansible -i <inventory> all -m shell -a "ps -ef | grep -i pmon"  -u <userID> --ask-pass --become --ask-sudo-pass
+ansible -i <inventory> all -m shell -a "ps -ef | grep -v <userID>"  -u <userID> --ask-pass --become --ask-sudo-pass
+ansible -i <inventory> all -m shell -a "systemctl status ntpd"  -u <userID> --ask-pass --become --ask-sudo-pass
+
+hastatus -summ
+rpm -qa | grep -i vrts
+
+ansible-playbook -i <inventory> patching-rhel.yml --syntax-check
+ansible-playbook -i <inventory> patching-rhel.yml --check
+ansible-playbook -i <inventory> patching-rhel.yml -u <userID> --ask-pass --ask-sudo-pass
+
+ansible -i <inventory> all -m shell -a "dmidecode -t system | grep -A 2 'Product Name' && echo ';' && dmidecode -t bios | grep 'Firmware Revision:' && echo ';' && cat /etc/redhat-release && echo ';' && uname -r && uptime" -u <userID> --ask-pass  --become --ask-sudo-pass 
+
+ansible -i <inventory> all -m shell -a "dmidecode -t system | grep 'Product Name' && dmidecode -t bios | grep 'Firmware Revision:' && cat /etc/redhat-release &&  uname -r && uptime" -u <userID> --ask-pass  --become --ask-sudo-pass
+
+yum clean all
+nohup yum --disablerepo="*" --enablerepo="repo6_LatestKernel" --enablerepo="repo6" --enablerepo="repoExtra" --exclude="*openjdk*" -y update &
+ 
+yum clean all;
+nohup yum --disablerepo="*"  --enablerepo="repo7" --exclude="*openjdk*" -y update &
+
+yum --disablerepo="*"  --enablerepo="repo7" --exclude="*openjdk*" -y update samba-client-libs
+yum --disablerepo="*"  --enablerepo="repo7" --exclude="*openjdk*" update samba-client-libs
+
+for i in X.X.X.{1..254} ; do echo $i ; done
+> pinglog ; for i in 10.158.113.{1..254} ; do if ping -c 1 $i > /dev/null 2>&1 ; then echo "$i Pining" >> pinglog ; else echo "$i NotPining" >> pinglog ; fi ; done
+
+
+ansible -i <inventory> all -m shell -a "vgs && lvs"  -u <userID> --ask-pass --become --ask-sudo-pass
+ansible-playbook -i <inventory> create-lv-mount.yaml -u <userID> --ask-pass --ask-sudo-pass --syntax-check
+ansible-playbook -i <inventory> create-lv-mount.yaml -u <userID> --ask-pass --ask-sudo-pass
+
+
+ansible -i <inventory> all -m shell -a "service multipathd status"  -u <userID> --ask-pass --become --ask-sudo-pass
+ansible -i <inventory> all -m shell -a "multipath -ll"  -u <userID> --ask-pass --become --ask-sudo-pass 
+
+cat Jul082021-MultipathLL-3 |  grep -v active | grep -v alua | grep -v 3PARdata | grep -v HP | grep -v hwhandler
+
+
+for i in `cat <inventory>2` ; do sed -i "/$i/d" <inventory>  ; done
+
+
+ansible-playbook -i <inventory> portcheck.yml -u <userID> --ask-pass --ask-sudo-pass --syntax-check
+ansible-playbook -i <inventory> portcheck.yml -u <userID> --ask-pass --ask-sudo-pass
+
+
+
+
+
+    
+    
