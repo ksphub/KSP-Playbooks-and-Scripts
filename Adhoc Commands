@@ -36,8 +36,8 @@ echo "$mysub" | mailx  -S smtp=<SMTPIP> -s "$mysub" -a ./"$myfile".txt <emailID>
     
     
     
-ansible -i slist all -m shell -a "service multipathd status"  -u eskamm01@uprising --ask-pass --become --ask-sudo-pass
-ansible -i slist all -m shell -a "multipath -ll"  -u eskamm01@uprising --ask-pass --become --ask-sudo-pass > Jul082021-MultipathLL-3
+ansible -i slist all -m shell -a "service multipathd status"  -u <userID> --ask-pass --become --ask-sudo-pass
+ansible -i slist all -m shell -a "multipath -ll"  -u <userID> --ask-pass --become --ask-sudo-pass 
 
 
 
