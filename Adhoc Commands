@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#Updated by KSP
 read -p 'FileName:' myfile
 read -p 'Subject:' mysub
 read -p 'USER:' myuser
