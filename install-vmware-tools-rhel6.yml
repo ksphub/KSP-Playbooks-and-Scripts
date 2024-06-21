@@ -1,3 +1,4 @@
+#Updated by KSP
 ---
 - name: Install VMware Tools on RHEL6
   hosts: all
