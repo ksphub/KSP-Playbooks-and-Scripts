@@ -1,4 +1,4 @@
-
+#Updated by KSP
 Create patching-rhel.yml
 ---
 - name: Patching LAB Servers Quarterly
